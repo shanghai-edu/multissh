@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
 	//	"github.com/bitly/go-simplejson"
 )
 
@@ -28,13 +29,13 @@ func main() {
 	cmd := flag.String("cmd", "", "cmds")
 	username := flag.String("u", "", "username")
 	password := flag.String("p", "", "password")
-	port := flag.String("port", "", "ssh port")
+	port := flag.Int("port", 22, "ssh port")
 	cmdFile := flag.String("cmdfile", "", "cmdfile path")
 	hostFile := flag.String("hostfile", "", "hostfile path")
 	ipFile := flag.String("ipfile", "", "hostfile path")
 	cfg := flag.String("cfg", "", "cfg path")
 	//gu
-	jsonFile := flag.String("j", "ssh.json", "Json File Path")
+	jsonFile := flag.String("j", "", "Json File Path")
 	outTxt := flag.Bool("outTxt", false, "write result into txt")
 	timeLimit := flag.Duration("t", 30, "max timeout")
 	numLimit := flag.Int("n", 20, "max execute number")
@@ -43,10 +44,6 @@ func main() {
 	var cmdList []string
 	var hostList []string
 	var err error
-	//gu
-	var usernameList []string
-	var passwordList []string
-	var portList []string
 
 	sshHosts := []SSHHost{}
 	var host_Struct SSHHost
@@ -70,19 +67,6 @@ func main() {
 		hostList = strings.Split(*hosts, ";")
 	}
 
-	//gu
-	if *username != "" {
-		usernameList = strings.Split(*username, ";")
-	}
-
-	if *password != "" {
-		passwordList = strings.Split(*password, ";")
-	}
-
-	if *port != "" {
-		portList = strings.Split(*port, ";")
-	}
-	////
 	if *cmdFile != "" {
 		cmdList, err = Getfile(*cmdFile)
 		if err != nil {
@@ -94,11 +78,11 @@ func main() {
 		cmdList = strings.Split(*cmd, ";")
 	}
 	if *cfg == "" {
-		for pos, host := range hostList {
+		for _, host := range hostList {
 			host_Struct.Host = host
-			host_Struct.Username = usernameList[pos]
-			host_Struct.Password = passwordList[pos]
-			host_Struct.Port, _ = strconv.Atoi(portList[pos])
+			host_Struct.Username = *username
+			host_Struct.Password = *password
+			host_Struct.Port = *port
 			host_Struct.Cmd = cmdList
 			sshHosts = append(sshHosts, host_Struct)
 		}
@@ -140,7 +124,7 @@ func main() {
 		}
 	*/
 	//fmt.Println(sshhosts)
-	chLimit := make(chan bool, numLimit)
+	chLimit := make(chan bool, *numLimit) //控制并发访问量
 	chs := make([]chan string, len(sshHosts))
 	limitFunc := func(chLimit chan bool, ch chan string, host SSHHost) {
 		dossh(host.Username, host.Password, host.Host, host.Cmd, host.Port, ch)
@@ -163,11 +147,12 @@ func main() {
 			log.Println("SSH run timeout")
 			sshHosts[i].Result += ("SSH run timeout：" + strconv.Itoa(int(*timeLimit)) + "second.")
 		}
+
 		fmt.Println(sshHosts[i].Host, " ssh end")
 	}
 
 	//gu
-	if *outTxt {
+	if !*outTxt {
 		for i := 0; i < len(sshHosts); i++ {
 			err = WriteIntoTxt(sshHosts[i])
 			if err != nil {

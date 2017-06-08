@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	//"os"
+
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -78,6 +79,7 @@ func dossh(username, password, ip string, cmdlist []string, port int, ch chan st
 
 	}
 	session.Wait()
+
 	ch <- (outbt.String() + errbt.String())
 	//<-chLimit
 	return

@@ -28,6 +28,15 @@ go build
         ssh port (default 22) //主机的 SSH 端口，默认 22
   -u string
         username //主机的 SSH 用户名
+  -j string
+        jsonFile //保存大量主机，包括主机地址，SSH用户名，SSH密码，SSH端口，所需执行的cmd指令文件地址
+  -outTxt bool
+        outTxt (default false) //是否允许把结果保存到文件中，true为允许  false为默认值
+  -t duration
+        timeLimit (default 30) //最大并发访问时间 默认为30s
+  -n int
+        numLimit (default 20) //最大并发访问量 默认为20
+
 ```
 **cmdfile 示例**
 ```
@@ -102,3 +111,20 @@ sw-2#exit
 10.10.15.102  ssh end
 ```
 
+#### ipfile
+```
+./multissh -j jsonSample.json -t 30 -n 20 -outTxt true
+10.10.15.101  ssh start
+sw-1#show clock
+05:29:43.269 UTC Tue Jun 6 2017
+sw-1#exit
+
+10.10.15.101  ssh end
+
+10.10.15.102  ssh start
+sw-2#show clock
+05:27:41.332 UTC Tue Jun 6 2017
+sw-2#exit
+
+10.10.15.102  ssh end
+```
