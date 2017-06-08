@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"encoding/binary"
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -34,6 +37,35 @@ func Getfile(filePath string) ([]string, error) {
 		result = append(result, lineStr)
 	}
 	return result, nil
+}
+
+//gu
+func GetJsonFile(filePath string) ([]SSHHost, error) {
+	result := []SSHHost{}
+	b, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		log.Println("read file ", filePath, err)
+		return result, err
+	}
+	var m HostJson
+	json.Unmarshal(b, &m)
+	result = m.SshHosts
+	return result, nil
+}
+func WriteIntoTxt(sshHost SSHHost) error {
+	outputFile, outputError := os.OpenFile(sshHost.Host+".txt", os.O_WRONLY|os.O_CREATE, 0666)
+	if outputError != nil {
+		return outputError
+	}
+	defer outputFile.Close()
+
+	outputWriter := bufio.NewWriter(outputFile)
+	//var outputString string
+
+	outputString := sshHost.Result
+	outputWriter.WriteString(outputString)
+	outputWriter.Flush()
+	return nil
 }
 
 func GetIpList(filePath string) ([]string, error) {
