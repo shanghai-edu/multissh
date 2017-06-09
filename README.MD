@@ -8,6 +8,10 @@ go get ./...
 go build
 ```
 
+#### release
+可以直接下载编译好的 release 版本
+提供 win64 和 linux64 两个平台的可执行文件
+https://github.com/shanghai-edu/multissh/releases/tag/0.1
 
 #### 命令体系
 ```
@@ -36,6 +40,7 @@ go build
         timeLimit (default 30) //单个 ssh 会话的最大时间，超过时间命令未执行完则超时 默认为30s
   -n int
         numLimit (default 20) //最大并发访问量 默认为20
+  -v    show version
 
 ```
 **cmdfile 示例**
