@@ -135,7 +135,7 @@ sw-2#exit
 
 #### ssh.json
 ```
-./multissh -j ssh.json -t 30 -n 20 -outTxt true
+./multissh -j ssh.json -t 30 -n 20 -outTxt
 192.168.15.101  ssh start
 sw-1#show clock
 05:29:43.269 UTC Tue Jun 6 2017
