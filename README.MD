@@ -10,7 +10,9 @@ go build
 
 #### release
 可以直接下载编译好的 release 版本
+
 提供 win64 和 linux64 两个平台的可执行文件
+
 https://github.com/shanghai-edu/multissh/releases/tag/0.1
 
 #### 命令体系
