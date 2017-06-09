@@ -73,7 +73,7 @@ exit
         }
     ]
 }
-``
+```
 
 ## 用法
 #### cmd string & host string
