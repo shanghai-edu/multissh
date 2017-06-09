@@ -4,11 +4,15 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
-
 	//	"github.com/bitly/go-simplejson"
+)
+
+const (
+	VERSION = "0.1"
 )
 
 type SSHHost struct {
@@ -25,6 +29,7 @@ type HostJson struct {
 }
 
 func main() {
+	version := flag.Bool("v", false, "show version")
 	hosts := flag.String("hosts", "", "host address list")
 	cmd := flag.String("cmd", "", "cmds")
 	username := flag.String("u", "", "username")
@@ -33,11 +38,10 @@ func main() {
 	cmdFile := flag.String("cmdfile", "", "cmdfile path")
 	hostFile := flag.String("hostfile", "", "hostfile path")
 	ipFile := flag.String("ipfile", "", "hostfile path")
-	cfg := flag.String("cfg", "", "cfg path")
 	//gu
 	jsonFile := flag.String("j", "", "Json File Path")
 	outTxt := flag.Bool("outTxt", false, "write result into txt")
-	timeLimit := flag.Duration("t", 30, "max timeout")
+	timeLimit := flag.Int("t", 30, "max timeout")
 	numLimit := flag.Int("n", 20, "max execute number")
 
 	flag.Parse()
@@ -47,6 +51,12 @@ func main() {
 
 	sshHosts := []SSHHost{}
 	var host_Struct SSHHost
+	timeout := time.Duration(*timeLimit) * time.Second
+
+	if *version {
+		fmt.Println(VERSION)
+		os.Exit(0)
+	}
 
 	if *ipFile != "" {
 		hostList, err = GetIpList(*ipFile)
@@ -77,7 +87,7 @@ func main() {
 	if *cmd != "" {
 		cmdList = strings.Split(*cmd, ";")
 	}
-	if *cfg == "" {
+	if *jsonFile == "" {
 		for _, host := range hostList {
 			host_Struct.Host = host
 			host_Struct.Username = *username
@@ -100,30 +110,10 @@ func main() {
 				log.Println("load cmdFile error: ", err)
 				return
 			}
-			//fmt.Println(cmdList)
 			sshHosts[i].Cmd = cmdList
 		}
-		//为什么不能用for range
 	}
 
-	/*
-		 else {
-			cfgjson, err := GetfileAll(*cfg)
-			if err != nil {
-				log.Println("load cfg error: ", err)
-				return
-			}
-
-				js, js_err := simplejson.NewJson(cfgjson)
-				if js_err != nil {
-					log.Println("json format error: ", js_err)
-					return
-				}
-
-
-		}
-	*/
-	//fmt.Println(sshhosts)
 	chLimit := make(chan bool, *numLimit) //控制并发访问量
 	chs := make([]chan string, len(sshHosts))
 	limitFunc := func(chLimit chan bool, ch chan string, host SSHHost) {
@@ -143,7 +133,7 @@ func main() {
 				fmt.Println(res)
 				sshHosts[i].Result += res
 			}
-		case <-time.After(*timeLimit * 1000 * 1000 * 1000):
+		case <-time.After(timeout):
 			log.Println("SSH run timeout")
 			sshHosts[i].Result += ("SSH run timeout：" + strconv.Itoa(int(*timeLimit)) + "second.")
 		}
@@ -152,7 +142,7 @@ func main() {
 	}
 
 	//gu
-	if !*outTxt {
+	if *outTxt {
 		for i := 0; i < len(sshHosts); i++ {
 			err = WriteIntoTxt(sshHosts[i])
 			if err != nil {

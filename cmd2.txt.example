@@ -1,4 +1,4 @@
 date
-sleep 10
+sleep 3
 date
 exit

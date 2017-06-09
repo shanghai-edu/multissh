@@ -1,0 +1,18 @@
+{
+    "SshHosts": [
+        {
+            "Host": "192.168.15.101", 
+            "Port": 22, 
+            "Username": "admin", 
+            "Password": "admin", 
+            "CmdFile": "cmd1.txt.example"
+        }, 
+        {
+            "Host": "192.168.83.40", 
+            "Port": 22, 
+            "Username": "root", 
+            "Password": "root", 
+            "CmdFile": "cmd2.txt.example"
+        }
+    ]
+}
