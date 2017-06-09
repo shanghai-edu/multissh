@@ -3,9 +3,10 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"time"
-
 	"net"
+	//"os"
+
+	"time"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -55,29 +56,32 @@ func connect(user, password, host string, port int) (*ssh.Session, error) {
 
 func dossh(username, password, ip string, cmdlist []string, port int, ch chan string) {
 	session, err := connect(username, password, ip, port)
+
 	if err != nil {
 		ch <- fmt.Sprintf("<%s>", err.Error())
+		//<-chLimit
 		return
+
 	}
 	defer session.Close()
 
 	//	cmd := "ls;date;exit"
-
 	stdinBuf, _ := session.StdinPipe()
-
+	//fmt.Fprintf(os.Stdout, "%s", stdinBuf)
 	var outbt, errbt bytes.Buffer
 	session.Stdout = &outbt
 
 	session.Stderr = &errbt
-
 	err = session.Shell()
 	for _, c := range cmdlist {
 		c = c + "\n"
 		stdinBuf.Write([]byte(c))
+
 	}
 	session.Wait()
-	ch <- (outbt.String() + errbt.String())
 
+	ch <- (outbt.String() + errbt.String())
+	//<-chLimit
 	return
 
 }

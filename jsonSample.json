@@ -1,0 +1,1 @@
+{"SshHosts":[{"Host":"1.1.1.1","Port":11,"Username":"xxx","Password":"xxx","CmdFile":"cmd1.txt"},{"Host":"1.1.1.1","Port":11,"Username":"yyy","Password":"yyy","CmdFile":"cmd2.txt"}]}
