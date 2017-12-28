@@ -155,6 +155,8 @@ sw-1#exit
 2017年 06月 09日 星期五 09:33:14 CST
 192.168.83.40  ssh end
 ```
+#### TODO
+增加使用证书认证的支持
 
 #### LICENSE
 Apache License 2.0
