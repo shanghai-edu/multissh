@@ -1,17 +1,18 @@
 package main
 
 import (
-	//	"bytes"
 	"os"
+	"strings"
+
 	"testing"
 )
 
 const (
-	username = ""
-	password = ""
-	ip       = ""
+	username = "admin"
+	password = "admin"
+	ip       = "192.168.31.21"
 	port     = 22
-	cmd      = "date\n"
+	cmd      = "show clock;exit"
 )
 
 func Test_SSH(t *testing.T) {
@@ -22,7 +23,7 @@ func Test_SSH(t *testing.T) {
 	}
 	defer session.Close()
 
-	//cmdlist := strings.Split(cmd, ";")
+	cmdlist := strings.Split(cmd, ";")
 
 	stdinBuf, err := session.StdinPipe()
 	if err != nil {
@@ -41,10 +42,10 @@ func Test_SSH(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	//	for _, c := range cmdlist {
-	//		c = c + "\n"
-	stdinBuf.Write([]byte(cmd))
-	//	}
+	for _, c := range cmdlist {
+		c = c + "\n"
+		stdinBuf.Write([]byte(c))
+	}
 	session.Wait()
 	t.Error(err)
 	//	t.Log(bt.String())
