@@ -13,7 +13,7 @@ go build
 
 提供 win64 和 linux64 两个平台的可执行文件
 
-https://github.com/shanghai-edu/multissh/releases/tag/0.1
+https://github.com/shanghai-edu/multissh/releases/
 
 #### 命令体系
 ```
