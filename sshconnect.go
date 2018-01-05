@@ -74,6 +74,7 @@ func dossh(username, password, ip string, cmdlist []string, port int, ch chan st
 	}
 	defer session.Close()
 
+	cmdlist = append(cmdlist, "exit")
 	//	cmd := "ls;date;exit"
 	stdinBuf, _ := session.StdinPipe()
 	//fmt.Fprintf(os.Stdout, "%s", stdinBuf)
