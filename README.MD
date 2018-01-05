@@ -48,7 +48,6 @@ https://github.com/shanghai-edu/multissh/releases/
 **cmdfile 示例**
 ```
 show clock
-exit
 ```
 **hostfile 示例**
 ```
@@ -85,7 +84,7 @@ exit
 ## 用法
 #### cmd string & host string
 ```
-./multissh -cmd "show clock;exit" -hosts "192.168.15.101;192.168.15.102" -u admin -p admin
+./multissh -cmd "show clock" -hosts "192.168.15.101;192.168.15.102" -u admin -p admin
 
 192.168.15.101  ssh start
 sw-1#show clock
