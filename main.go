@@ -1,65 +1,52 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"os"
-	"strconv"
-	"strings"
+
 	"time"
-	//	"github.com/bitly/go-simplejson"
-)
 
-const (
-	VERSION = "0.1.2"
+	"github.com/shanghai-edu/multissh/funcs"
+	"github.com/shanghai-edu/multissh/g"
 )
-
-type SSHHost struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
-	CmdFile  string
-	Cmd      []string
-	Result   string
-}
-type HostJson struct {
-	SshHosts []SSHHost
-}
 
 func main() {
 	version := flag.Bool("v", false, "show version")
 	hosts := flag.String("hosts", "", "host address list")
-	cmd := flag.String("cmd", "", "cmds")
+	cmds := flag.String("cmds", "", "cmds")
 	username := flag.String("u", "", "username")
 	password := flag.String("p", "", "password")
+	key := flag.String("k", "", "ssh private key")
 	port := flag.Int("port", 22, "ssh port")
+	ciphers := flag.String("ciphers", "", "ciphers")
 	cmdFile := flag.String("cmdfile", "", "cmdfile path")
 	hostFile := flag.String("hostfile", "", "hostfile path")
 	ipFile := flag.String("ipfile", "", "hostfile path")
-	//gu
-	jsonFile := flag.String("j", "", "Json File Path")
+	cfgFile := flag.String("c", "", "cfg File Path")
+	jsonMode := flag.Bool("j", false, "print output in json format")
 	outTxt := flag.Bool("outTxt", false, "write result into txt")
+	linuxMode := flag.Bool("l", false, "In linux mode,multi command combine with && ,such as date&&cd /opt&&ls")
 	timeLimit := flag.Int("t", 30, "max timeout")
 	numLimit := flag.Int("n", 20, "max execute number")
 
 	flag.Parse()
-	var cmdList []string
-	var hostList []string
+
+	var cmdList, hostList, cipherList []string
 	var err error
 
-	sshHosts := []SSHHost{}
-	var host_Struct SSHHost
-	timeout := time.Duration(*timeLimit) * time.Second
+	sshHosts := []g.SSHHost{}
+	var host_Struct g.SSHHost
 
 	if *version {
-		fmt.Println(VERSION)
+		fmt.Println(g.VERSION)
 		os.Exit(0)
 	}
 
 	if *ipFile != "" {
-		hostList, err = GetIpList(*ipFile)
+		hostList, err = g.GetIpList(*ipFile)
 		if err != nil {
 			log.Println("load hostlist error: ", err)
 			return
@@ -67,89 +54,104 @@ func main() {
 	}
 
 	if *hostFile != "" {
-		hostList, err = Getfile(*hostFile)
+		hostList, err = g.Getfile(*hostFile)
 		if err != nil {
 			log.Println("load hostfile error: ", err)
 			return
 		}
 	}
 	if *hosts != "" {
-		hostList = strings.Split(*hosts, ";")
+		hostList = g.SplitString(*hosts)
 	}
 
 	if *cmdFile != "" {
-		cmdList, err = Getfile(*cmdFile)
+		cmdList, err = g.Getfile(*cmdFile)
 		if err != nil {
 			log.Println("load cmdfile error: ", err)
 			return
 		}
 	}
-	if *cmd != "" {
-		cmdList = strings.Split(*cmd, ";")
+	if *cmds != "" {
+		cmdList = g.SplitString(*cmds)
+
 	}
-	if *jsonFile == "" {
+	if *ciphers != "" {
+		cipherList = g.SplitString(*ciphers)
+	}
+	if *cfgFile == "" {
 		for _, host := range hostList {
 			host_Struct.Host = host
 			host_Struct.Username = *username
 			host_Struct.Password = *password
 			host_Struct.Port = *port
-			host_Struct.Cmd = cmdList
+			host_Struct.CmdList = cmdList
+			host_Struct.Key = *key
+			host_Struct.LinuxMode = *linuxMode
 			sshHosts = append(sshHosts, host_Struct)
 		}
-	}
-	//gu
-	if *jsonFile != "" {
-		sshHosts, err = GetJsonFile(*jsonFile)
+	} else {
+		sshHosts, err = g.GetJsonFile(*cfgFile)
 		if err != nil {
-			log.Println("load jsonFile error: ", err)
+			log.Println("load cfgFile error: ", err)
 			return
 		}
 		for i := 0; i < len(sshHosts); i++ {
-			cmdList, err = Getfile(sshHosts[i].CmdFile)
-			if err != nil {
-				log.Println("load cmdFile error: ", err)
-				return
+			if sshHosts[i].Cmds != "" {
+				sshHosts[i].CmdList = g.SplitString(sshHosts[i].Cmds)
+			} else {
+				cmdList, err = g.Getfile(sshHosts[i].CmdFile)
+				if err != nil {
+					log.Println("load cmdFile error: ", err)
+					return
+				}
+				sshHosts[i].CmdList = cmdList
 			}
-			sshHosts[i].Cmd = cmdList
 		}
 	}
 
 	chLimit := make(chan bool, *numLimit) //控制并发访问量
-	chs := make([]chan string, len(sshHosts))
-	limitFunc := func(chLimit chan bool, ch chan string, host SSHHost) {
-		dossh(host.Username, host.Password, host.Host, host.Cmd, host.Port, ch)
+	chs := make([]chan g.SSHResult, len(sshHosts))
+	startTime := time.Now()
+	log.Println("Multissh start")
+	limitFunc := func(chLimit chan bool, ch chan g.SSHResult, host g.SSHHost) {
+		funcs.Dossh(host.Username, host.Password, host.Host, host.Key, host.CmdList, host.Port, *timeLimit, cipherList, host.LinuxMode, ch)
 		<-chLimit
 	}
 	for i, host := range sshHosts {
-		chs[i] = make(chan string, 1)
+		chs[i] = make(chan g.SSHResult, 1)
 		chLimit <- true
 		go limitFunc(chLimit, chs[i], host)
 	}
-	for i, ch := range chs {
-		fmt.Println(sshHosts[i].Host, " ssh start")
-		select {
-		case res := <-ch:
-			if res != "" {
-				fmt.Println(res)
-				sshHosts[i].Result += res
-			}
-		case <-time.After(timeout):
-			log.Println("SSH run timeout")
-			sshHosts[i].Result += ("SSH run timeout：" + strconv.Itoa(int(*timeLimit)) + "second.")
+	sshResults := []g.SSHResult{}
+	for _, ch := range chs {
+		res := <-ch
+		if res.Result != "" {
+			sshResults = append(sshResults, res)
 		}
-
-		fmt.Println(sshHosts[i].Host, " ssh end")
 	}
-
+	endTime := time.Now()
+	log.Printf("Multissh finished. Process time %s. Number of active ip is %d", endTime.Sub(startTime), len(sshHosts))
 	//gu
 	if *outTxt {
-		for i := 0; i < len(sshHosts); i++ {
-			err = WriteIntoTxt(sshHosts[i])
+		for _, sshResult := range sshResults {
+			err = g.WriteIntoTxt(sshResult)
 			if err != nil {
 				log.Println("write into txt error: ", err)
 				return
 			}
 		}
 	}
-
+	if *jsonMode {
+		jsonResult, err := json.Marshal(sshResults)
+		if err != nil {
+			log.Println("json Marshal error: ", err)
+		}
+		fmt.Println(string(jsonResult))
+	} else {
+		for _, sshResult := range sshResults {
+			fmt.Println("host: ", sshResult.Host)
+			fmt.Println("========= Result =========")
+			fmt.Println(sshResult.Result)
+		}
+	}
 }

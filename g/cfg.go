@@ -1,4 +1,4 @@
-package main
+package g
 
 import (
 	"bufio"
@@ -11,6 +11,38 @@ import (
 	"strconv"
 	"strings"
 )
+
+type SSHHost struct {
+	Host      string
+	Port      int
+	Username  string
+	Password  string
+	CmdFile   string
+	Cmds      string
+	CmdList   []string
+	Key       string
+	LinuxMode bool
+	Result    SSHResult
+}
+
+type HostJson struct {
+	SshHosts []SSHHost
+}
+
+type SSHResult struct {
+	Host    string
+	Success bool
+	Result  string
+}
+
+func SplitString(str string) (strList []string) {
+	if strings.Contains(str, ",") {
+		strList = strings.Split(str, ",")
+	} else {
+		strList = strings.Split(str, ";")
+	}
+	return
+}
 
 func GetfileAll(filePath string) ([]byte, error) {
 	result, err := ioutil.ReadFile(filePath)
@@ -52,8 +84,8 @@ func GetJsonFile(filePath string) ([]SSHHost, error) {
 	result = m.SshHosts
 	return result, nil
 }
-func WriteIntoTxt(sshHost SSHHost) error {
-	outputFile, outputError := os.OpenFile(sshHost.Host+".txt", os.O_WRONLY|os.O_CREATE, 0666)
+func WriteIntoTxt(sshResult SSHResult) error {
+	outputFile, outputError := os.OpenFile(sshResult.Host+".txt", os.O_WRONLY|os.O_CREATE, 0666)
 	if outputError != nil {
 		return outputError
 	}
@@ -62,7 +94,7 @@ func WriteIntoTxt(sshHost SSHHost) error {
 	outputWriter := bufio.NewWriter(outputFile)
 	//var outputString string
 
-	outputString := sshHost.Result
+	outputString := sshResult.Result
 	outputWriter.WriteString(outputString)
 	outputWriter.Flush()
 	return nil

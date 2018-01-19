@@ -1,17 +1,19 @@
 {
     "SshHosts": [
         {
-            "Host": "192.168.15.101", 
-            "Port": 22, 
-            "Username": "admin", 
-            "Password": "admin", 
-            "CmdFile": "cmd1.txt.example"
-        }, 
+            "Host": "192.168.31.51",
+            "Port": 22,
+            "Username": "admin",
+            "Password": "admin",
+			"cmds":"show clock;show clock"
+        },
         {
-            "Host": "192.168.83.40", 
-            "Port": 22, 
-            "Username": "root", 
-            "Password": "root", 
+            "Host": "192.168.80.131",
+            "Port": 22,
+            "Username": "root",
+            "Password": "",
+            "key": "./server.key",
+            "linuxMode": true,
             "CmdFile": "cmd2.txt.example"
         }
     ]
