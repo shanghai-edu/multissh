@@ -41,11 +41,13 @@ Usage of ./multissh:
   -hosts string
         host address list
   -ipfile string
-        hostfile path
+        ipfile path
+  -ips string
+        ip address list
   -j    print output in json format
   -k string
         ssh private key
-  -l    In linux mode,multi command combine with && ,such as date&&cd /opt&&ls (default true)
+  -l    In linux mode,multi command combine with && ,such as date&&cd /opt&&ls
   -n int
         max execute number (default 20)
   -outTxt
