@@ -100,7 +100,21 @@ func WriteIntoTxt(sshResult SSHResult) error {
 	return nil
 }
 
-func GetIpList(filePath string) ([]string, error) {
+func GetIpList(ipString string) ([]string, error) {
+	res := SplitString(ipString)
+	var allIp []string
+	if len(res) > 0 {
+		for _, sip := range res {
+			aip := ParseIp(sip)
+			for _, ip := range aip {
+				allIp = append(allIp, ip)
+			}
+		}
+	}
+	return allIp, nil
+}
+
+func GetIpListFromFile(filePath string) ([]string, error) {
 	res, err := Getfile(filePath)
 	if err != nil {
 		return nil, nil

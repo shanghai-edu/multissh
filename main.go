@@ -16,6 +16,7 @@ import (
 func main() {
 	version := flag.Bool("v", false, "show version")
 	hosts := flag.String("hosts", "", "host address list")
+	ips := flag.String("ips", "", "ip address list")
 	cmds := flag.String("cmds", "", "cmds")
 	username := flag.String("u", "", "username")
 	password := flag.String("p", "", "password")
@@ -24,7 +25,7 @@ func main() {
 	ciphers := flag.String("ciphers", "", "ciphers")
 	cmdFile := flag.String("cmdfile", "", "cmdfile path")
 	hostFile := flag.String("hostfile", "", "hostfile path")
-	ipFile := flag.String("ipfile", "", "hostfile path")
+	ipFile := flag.String("ipfile", "", "ipfile path")
 	cfgFile := flag.String("c", "", "cfg File Path")
 	jsonMode := flag.Bool("j", false, "print output in json format")
 	outTxt := flag.Bool("outTxt", false, "write result into txt")
@@ -46,9 +47,9 @@ func main() {
 	}
 
 	if *ipFile != "" {
-		hostList, err = g.GetIpList(*ipFile)
+		hostList, err = g.GetIpListFromFile(*ipFile)
 		if err != nil {
-			log.Println("load hostlist error: ", err)
+			log.Println("load iplist error: ", err)
 			return
 		}
 	}
@@ -60,6 +61,14 @@ func main() {
 			return
 		}
 	}
+	if *ips != "" {
+		hostList, err = g.GetIpList(*ips)
+		if err != nil {
+			log.Println("load iplist error: ", err)
+			return
+		}
+	}
+
 	if *hosts != "" {
 		hostList = g.SplitString(*hosts)
 	}
