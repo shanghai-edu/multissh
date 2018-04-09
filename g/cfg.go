@@ -84,8 +84,8 @@ func GetJsonFile(filePath string) ([]SSHHost, error) {
 	result = m.SshHosts
 	return result, nil
 }
-func WriteIntoTxt(sshResult SSHResult) error {
-	outputFile, outputError := os.OpenFile(sshResult.Host+".txt", os.O_WRONLY|os.O_CREATE, 0666)
+func WriteIntoTxt(sshResult SSHResult, locate string) error {
+	outputFile, outputError := os.OpenFile(locate+sshResult.Host+".txt", os.O_WRONLY|os.O_CREATE, 0666)
 	if outputError != nil {
 		return outputError
 	}

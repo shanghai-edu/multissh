@@ -29,6 +29,7 @@ func main() {
 	cfgFile := flag.String("c", "", "cfg File Path")
 	jsonMode := flag.Bool("j", false, "print output in json format")
 	outTxt := flag.Bool("outTxt", false, "write result into txt")
+	fileLocate := flag.String("f", "", "write file locate")
 	linuxMode := flag.Bool("l", false, "In linux mode,multi command combine with && ,such as date&&cd /opt&&ls")
 	timeLimit := flag.Int("t", 30, "max timeout")
 	numLimit := flag.Int("n", 20, "max execute number")
@@ -143,12 +144,13 @@ func main() {
 	//gu
 	if *outTxt {
 		for _, sshResult := range sshResults {
-			err = g.WriteIntoTxt(sshResult)
+			err = g.WriteIntoTxt(sshResult, *fileLocate)
 			if err != nil {
 				log.Println("write into txt error: ", err)
 				return
 			}
 		}
+		return
 	}
 	if *jsonMode {
 		jsonResult, err := json.Marshal(sshResults)
@@ -156,11 +158,12 @@ func main() {
 			log.Println("json Marshal error: ", err)
 		}
 		fmt.Println(string(jsonResult))
-	} else {
-		for _, sshResult := range sshResults {
-			fmt.Println("host: ", sshResult.Host)
-			fmt.Println("========= Result =========")
-			fmt.Println(sshResult.Result)
-		}
+		return
 	}
+	for _, sshResult := range sshResults {
+		fmt.Println("host: ", sshResult.Host)
+		fmt.Println("========= Result =========")
+		fmt.Println(sshResult.Result)
+	}
+
 }
