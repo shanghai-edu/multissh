@@ -36,6 +36,8 @@ Usage of ./multissh:
         cmdfile path
   -cmds string
         cmds
+  -f string
+        write file locate
   -hostfile string
         hostfile path
   -hosts string
