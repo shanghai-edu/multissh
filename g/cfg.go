@@ -80,7 +80,11 @@ func GetJsonFile(filePath string) ([]SSHHost, error) {
 		return result, err
 	}
 	var m HostJson
-	json.Unmarshal(b, &m)
+	err = json.Unmarshal(b, &m)
+	if err != nil {
+		log.Println("read file ", filePath, err)
+		return result, err
+	}
 	result = m.SshHosts
 	return result, nil
 }

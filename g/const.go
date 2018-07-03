@@ -6,6 +6,8 @@ package g
 // 0.2
 // 0.2.1
 // add write locate file
+// json Unmarshal with error
+// 0.2.3
 const (
-	VERSION = "0.2.2"
+	VERSION = "0.2.3"
 )

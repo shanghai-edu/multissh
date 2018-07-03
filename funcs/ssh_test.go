@@ -3,7 +3,7 @@ package funcs
 import (
 	"bytes"
 	//	"os"
-	//"strings"
+	"strings"
 	"testing"
 )
 
@@ -16,7 +16,6 @@ const (
 	key      = "../server.key"
 )
 
-/*
 func Test_SSH(t *testing.T) {
 	var cipherList []string
 	session, err := connect(username, password, ip, key, port, cipherList)
@@ -51,8 +50,8 @@ func Test_SSH(t *testing.T) {
 	t.Log((outbt.String() + errbt.String()))
 	return
 }
-*/
 
+/*
 func Test_SSH_run(t *testing.T) {
 	var cipherList []string
 	session, err := connect(username, password, ip, key, port, cipherList)
@@ -77,3 +76,4 @@ func Test_SSH_run(t *testing.T) {
 
 	return
 }
+*/
