@@ -29,40 +29,42 @@ https://github.com/shanghai-edu/multissh/releases/
 # ./multissh -h
 Usage of ./multissh:
   -c string
-        cfg File Path
+    	cfg File Path
   -ciphers string
-        ciphers
+    	ciphers
   -cmdfile string
-        cmdfile path
+    	cmdfile path
   -cmds string
-        cmds
+    	cmds
   -f string
-        write file locate
+    	write file locate
   -hostfile string
-        hostfile path
+    	hostfile path
   -hosts string
-        host address list
+    	host address list
   -ipfile string
-        ipfile path
+    	ipfile path
   -ips string
-        ip address list
-  -j    print output in json format
+    	ip address list
+  -j	print output in json format
   -k string
-        ssh private key
-  -l    In linux mode,multi command combine with && ,such as date&&cd /opt&&ls
+    	ssh private key
+  -keyexchanges string
+    	keyexchanges
+  -l	In linux mode,multi command combine with && ,such as date&&cd /opt&&ls
   -n int
-        max execute number (default 20)
+    	max execute number (default 20)
   -outTxt
-        write result into txt
+    	write result into txt
   -p string
-        password
+    	password
   -port int
-        ssh port (default 22)
+    	ssh port (default 22)
   -t int
-        max timeout (default 30)
+    	max timeout (default 30)
   -u string
-        username
-  -v    show version
+    	username
+  -v	show version
 ```
 **cmdfile 示例**
 ```
@@ -82,24 +84,28 @@ show clock
 **ssh.json 示例**
 ```
 {
-    "SshHosts": [
-        {
-            "Host": "192.168.31.51",
-            "Port": 22,
-            "Username": "admin",
-            "Password": "admin",
-			"cmds":"show clock;show clock"
-        },
-        {
-            "Host": "192.168.80.131",
-            "Port": 22,
-            "Username": "root",
-            "Password": "",
-            "key": "./server.key",
-            "linuxMode": true,
-            "CmdFile": "cmd2.txt.example"
-        }
-    ]
+	"SshHosts": [{
+			"Host": "192.168.31.51",
+			"Port": 22,
+			"Username": "admin",
+			"Password": "admin",
+			"cmds": "show clock;show clock"
+		},
+		{
+			"Host": "192.168.80.131",
+			"Port": 22,
+			"Username": "root",
+			"Password": "",
+			"key": "./server.key",
+			"linuxMode": true,
+			"CmdFile": "cmd2.txt.example"
+		}
+	],
+	"Global": {
+		"Ciphers": "aes128-ctr,aes192-ctr,aes256-ctr,aes128-cbc,3des-cbc",
+		"KeyExchanges": "diffie-hellman-group1-sha1,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1"
+	}
+
 }
 ```
 
