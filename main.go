@@ -23,6 +23,7 @@ func main() {
 	key := flag.String("k", "", "ssh private key")
 	port := flag.Int("port", 22, "ssh port")
 	ciphers := flag.String("ciphers", "", "ciphers")
+	keyExchanges := flag.String("keyexchanges", "", "keyexchanges")
 	cmdFile := flag.String("cmdfile", "", "cmdfile path")
 	hostFile := flag.String("hostfile", "", "hostfile path")
 	ipFile := flag.String("ipfile", "", "ipfile path")
@@ -36,7 +37,7 @@ func main() {
 
 	flag.Parse()
 
-	var cmdList, hostList, cipherList []string
+	var cmdList, hostList, cipherList, keyExchangeList []string
 	var err error
 
 	sshHosts := []g.SSHHost{}
@@ -88,6 +89,9 @@ func main() {
 	if *ciphers != "" {
 		cipherList = g.SplitString(*ciphers)
 	}
+	if *keyExchanges != "" {
+		keyExchangeList = g.SplitString(*keyExchanges)
+	}
 	if *cfgFile == "" {
 		for _, host := range hostList {
 			host_Struct.Host = host
@@ -100,11 +104,14 @@ func main() {
 			sshHosts = append(sshHosts, host_Struct)
 		}
 	} else {
-		sshHosts, err = g.GetJsonFile(*cfgFile)
+		sshHostConfig, err := g.GetJsonFile(*cfgFile)
 		if err != nil {
 			log.Println("load cfgFile error: ", err)
 			return
 		}
+		cipherList = g.SplitString(sshHostConfig.Global.Ciphers)
+		keyExchangeList = g.SplitString(sshHostConfig.Global.KeyExchanges)
+		sshHosts = sshHostConfig.SshHosts
 		for i := 0; i < len(sshHosts); i++ {
 			if sshHosts[i].Cmds != "" {
 				sshHosts[i].CmdList = g.SplitString(sshHosts[i].Cmds)
@@ -124,7 +131,7 @@ func main() {
 	startTime := time.Now()
 	log.Println("Multissh start")
 	limitFunc := func(chLimit chan bool, ch chan g.SSHResult, host g.SSHHost) {
-		funcs.Dossh(host.Username, host.Password, host.Host, host.Key, host.CmdList, host.Port, *timeLimit, cipherList, host.LinuxMode, ch)
+		funcs.Dossh(host.Username, host.Password, host.Host, host.Key, host.CmdList, host.Port, *timeLimit, cipherList, keyExchangeList, host.LinuxMode, ch)
 		<-chLimit
 	}
 	for i, host := range sshHosts {

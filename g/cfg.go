@@ -27,6 +27,12 @@ type SSHHost struct {
 
 type HostJson struct {
 	SshHosts []SSHHost
+	Global   GlobalConfig
+}
+
+type GlobalConfig struct {
+	Ciphers      string
+	KeyExchanges string
 }
 
 type SSHResult struct {
@@ -36,6 +42,9 @@ type SSHResult struct {
 }
 
 func SplitString(str string) (strList []string) {
+	if str == "" {
+		return
+	}
 	if strings.Contains(str, ",") {
 		strList = strings.Split(str, ",")
 	} else {
@@ -72,20 +81,18 @@ func Getfile(filePath string) ([]string, error) {
 }
 
 //gu
-func GetJsonFile(filePath string) ([]SSHHost, error) {
-	result := []SSHHost{}
+func GetJsonFile(filePath string) (HostJson, error) {
+	var result HostJson
 	b, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		log.Println("read file ", filePath, err)
 		return result, err
 	}
-	var m HostJson
-	err = json.Unmarshal(b, &m)
+	err = json.Unmarshal(b, &result)
 	if err != nil {
 		log.Println("read file ", filePath, err)
 		return result, err
 	}
-	result = m.SshHosts
 	return result, nil
 }
 func WriteIntoTxt(sshResult SSHResult, locate string) error {

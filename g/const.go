@@ -9,5 +9,5 @@ package g
 // json Unmarshal with error
 // 0.2.3
 const (
-	VERSION = "0.3.0"
+	VERSION = "0.4.0"
 )

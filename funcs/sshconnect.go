@@ -14,7 +14,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func connect(user, password, host, key string, port int, cipherList []string) (*ssh.Session, error) {
+func connect(user, password, host, key string, port int, cipherList, keyExchangeList []string) (*ssh.Session, error) {
 	var (
 		auth         []ssh.AuthMethod
 		addr         string
@@ -45,16 +45,16 @@ func connect(user, password, host, key string, port int, cipherList []string) (*
 		}
 		auth = append(auth, ssh.PublicKeys(signer))
 	}
-
 	if len(cipherList) == 0 {
-		config = ssh.Config{
-			Ciphers:      []string{"aes128-ctr", "aes192-ctr", "aes256-ctr", "aes128-gcm@openssh.com", "arcfour256", "arcfour128", "aes128-cbc", "3des-cbc", "aes192-cbc", "aes256-cbc"},
-			KeyExchanges: []string{"diffie-hellman-group-exchange-sha1", "diffie-hellman-group1-sha1", "diffie-hellman-group-exchange-sha256"},
-		}
+		config.Ciphers = []string{"aes128-ctr", "aes192-ctr", "aes256-ctr", "aes128-gcm@openssh.com", "arcfour256", "arcfour128", "aes128-cbc", "3des-cbc", "aes192-cbc", "aes256-cbc"}
 	} else {
-		config = ssh.Config{
-			Ciphers: cipherList,
-		}
+		config.Ciphers = cipherList
+	}
+
+	if len(keyExchangeList) == 0 {
+		config.KeyExchanges = []string{"diffie-hellman-group-exchange-sha1", "diffie-hellman-group1-sha1", "diffie-hellman-group-exchange-sha256"}
+	} else {
+		config.KeyExchanges = keyExchangeList
 	}
 
 	clientConfig = &ssh.ClientConfig{
@@ -92,12 +92,12 @@ func connect(user, password, host, key string, port int, cipherList []string) (*
 	return session, nil
 }
 
-func Dossh(username, password, host, key string, cmdlist []string, port, timeout int, cipherList []string, linuxMode bool, ch chan g.SSHResult) {
+func Dossh(username, password, host, key string, cmdlist []string, port, timeout int, cipherList, keyExchangeList []string, linuxMode bool, ch chan g.SSHResult) {
 	chSSH := make(chan g.SSHResult)
 	if linuxMode {
-		go dossh_run(username, password, host, key, cmdlist, port, cipherList, chSSH)
+		go dossh_run(username, password, host, key, cmdlist, port, cipherList, keyExchangeList, chSSH)
 	} else {
-		go dossh_session(username, password, host, key, cmdlist, port, cipherList, chSSH)
+		go dossh_session(username, password, host, key, cmdlist, port, cipherList, keyExchangeList, chSSH)
 	}
 	var res g.SSHResult
 
@@ -113,8 +113,8 @@ func Dossh(username, password, host, key string, cmdlist []string, port, timeout
 	return
 }
 
-func dossh_session(username, password, host, key string, cmdlist []string, port int, cipherList []string, ch chan g.SSHResult) {
-	session, err := connect(username, password, host, key, port, cipherList)
+func dossh_session(username, password, host, key string, cmdlist []string, port int, cipherList, keyExchangeList []string, ch chan g.SSHResult) {
+	session, err := connect(username, password, host, key, port, cipherList, keyExchangeList)
 	var sshResult g.SSHResult
 	sshResult.Host = host
 
@@ -159,8 +159,8 @@ func dossh_session(username, password, host, key string, cmdlist []string, port 
 	return
 }
 
-func dossh_run(username, password, host, key string, cmdlist []string, port int, cipherList []string, ch chan g.SSHResult) {
-	session, err := connect(username, password, host, key, port, cipherList)
+func dossh_run(username, password, host, key string, cmdlist []string, port int, cipherList, keyExchangeList []string, ch chan g.SSHResult) {
+	session, err := connect(username, password, host, key, port, cipherList, keyExchangeList)
 	var sshResult g.SSHResult
 	sshResult.Host = host
 
