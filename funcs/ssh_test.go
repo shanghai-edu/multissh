@@ -18,7 +18,7 @@ const (
 
 func Test_SSH(t *testing.T) {
 	var cipherList []string
-	session, err := connect(username, password, ip, key, port, cipherList)
+	session, err := connect(username, password, ip, key, port, cipherList, nil)
 	if err != nil {
 		t.Error(err)
 		return
