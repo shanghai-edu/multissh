@@ -16,6 +16,10 @@ const (
 	key      = "../server.key"
 )
 
+// Tests the SSH functionality of the package.
+//
+// It requires manual input of the local SSH private key path into the key
+// variable, and the remote address into the ip variable.
 func Test_SSH(t *testing.T) {
 	var cipherList []string
 	session, err := connect(username, password, ip, key, port, cipherList, nil)
